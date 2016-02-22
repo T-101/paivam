@@ -152,7 +152,7 @@ proc getDate {} {
 	set clock [clock seconds]
 	set date [string trim [clock format $clock -format {%e.%m.%Y}]]
 	set day [string map $dayMap [clock format $clock -format %w]]
-	set weekNumber [expr [clock format $clock -format %W] + 1]
+	set weekNumber [expr [scan [clock format $clock -format %W] %d] + 1]
 	return "Tänään on $day $date (Viikko $weekNumber)"
 }
 
