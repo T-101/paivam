@@ -20,6 +20,7 @@
 ##
 ##	Version history:
 ##		1.0	-	Initial release
+##		1.01	-	Fixed issue with weeknumbers
 
 namespace eval ::pvm {
 
@@ -33,7 +34,7 @@ set announceHour 05
 ##	After this, here be dragons
 ##
 
-set pvmVersion 1.0
+set pvmVersion 1.01
 
 bind time - "00 $announceHour % % %" ::pvm::announce
 bind pub - !pvm ::pvm::announce
@@ -152,7 +153,7 @@ proc getDate {} {
 	set clock [clock seconds]
 	set date [string trim [clock format $clock -format {%e.%m.%Y}]]
 	set day [string map $dayMap [clock format $clock -format %w]]
-	set weekNumber [expr [scan [clock format $clock -format %W] %d] + 1]
+	set weekNumber [scan [clock format $clock -format %W] %d]
 	return "Tänään on $day $date (Viikko $weekNumber)"
 }
 
@@ -198,6 +199,6 @@ proc announce { args } {
 
 }
 
-putlog "pvm.tcl pvmVersion by T-101 loaded!"
+putlog "pvm.tcl $pvmVersion by T-101 loaded!"
 
 }
