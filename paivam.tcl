@@ -22,6 +22,7 @@
 ##		1.0	-	Initial release
 ##		1.0.1	-	Fixed issue with weeknumbers
 ##              1.0.2   -       Updated namedays to work with updated external service
+##              1.0.3   -       Fixed issue when triggering !pvm command, it would announce it in any channel where the bot is
 
 namespace eval ::pvm {
 
@@ -35,7 +36,7 @@ set announceHour 05
 ##	After this, here be dragons
 ##
 
-set pvmVersion 1.0.2
+set pvmVersion 1.0.3
 
 bind time - "00 $announceHour % % %" ::pvm::announce
 bind pub - !pvm ::pvm::announce
@@ -204,8 +205,13 @@ proc announce { args } {
 	variable kanavat
 	if {[string index [lindex $args 3] 0] == "#"} {
 		# called via !pvm
-                putquick "NOTICE [lindex $args 3] :[outputNameday]"
-                putquick "NOTICE [lindex $args 3] :[getMerkkipaiva]"
+		set channel [lindex $args 3]
+		foreach kanava [split $kanavat] {
+                    if {[string tolower $kanava] == [string tolower $channel]} {
+                        putquick "NOTICE $channel :[outputNameday]"
+                        putquick "NOTICE $channel :[getMerkkipaiva]"
+                    }
+		}
 	} else {
 		# called via cron
 		foreach kanava [split $kanavat] {
