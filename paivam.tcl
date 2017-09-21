@@ -20,11 +20,12 @@
 ##
 ##	Version history:
 ##		1.0	-	Initial release
-##		1.01	-	Fixed issue with weeknumbers
+##		1.0.1	-	Fixed issue with weeknumbers
+##              1.0.2   -       Updated namedays to work with updated external service
 
 namespace eval ::pvm {
 
-## add channels HERE
+##      add channels HERE
 set kanavat "#justsesunkanava"
 
 ##	Change daily hour HERE
@@ -34,12 +35,13 @@ set announceHour 05
 ##	After this, here be dragons
 ##
 
-set pvmVersion 1.01
+set pvmVersion 1.0.2
 
 bind time - "00 $announceHour % % %" ::pvm::announce
 bind pub - !pvm ::pvm::announce
 
 package require http
+package require tls
 
 proc getHoliday {} {
 	set juhlaPaivat {
@@ -130,19 +132,35 @@ proc getHoliday {} {
 }
 
 proc getNameday {} {
-	set date [clock format [clock seconds] -format {%d.%m}]
-	set url http://nimihaku.helsinki.fi/nimihaku.php
-	set query [::http::formatQuery paiva ${date}. nimi "" kanta suomi submit Hae]
+	set date [clock format [clock seconds] -format {%d%m}]
+	set url "https://almanakka.helsinki.fi/nimipaiva/datesearch.php?z=$date"
 	set userAgent "Chrome 45.0.2454.101"
 	::http::config -useragent $userAgent
-	set httpHandler [::http::geturl $url -query $query]
+	::http::register https 443 ::tls::socket
+	::tls::init -tls1 1
+	set httpHandler [::http::geturl $url]
 	set text [::http::data $httpHandler]
+	::http::unregister https
 	::http::cleanup $httpHandler
 
-	set lines [split $text "\n"]
-	foreach line [lsearch -all $lines "*td*"] {
-		lappend results [string trim [regsub -all {<([^<])*>} [lindex $lines $line] {}]]
-	}
+	# Cleanup the html-garbage we've accumulated
+        set items [regexp -inline {Suomalaiset<\/h4>(.*?)<\/ul>} $text]
+        if {[llength $items] == 0} { 
+            putlog "No items after cleanup"
+            return
+        }
+        
+        # Remove html-tags, leaving us with just the names
+        set names [regsub -all {(<[^>]*>)+} [lindex $items end] {}]
+        if {[llength $names] == 0} {
+            putlog "No names in items"
+            return
+        }
+        
+        foreach item $names {
+            if {[string length $item]} {lappend results $item}
+        }
+	
 	if {[info exists results]} {
 		return " ja nimipäivää viettävät: [join [lsort $results] ", "]"
 	}
@@ -166,9 +184,9 @@ proc getMerkkipaiva {} {
         set html [split [::http::data $httpHandler] "\n"]
         ::http::cleanup $httpHandler
 
-	set date [clock format [clock seconds] -format <td>%d.%m.]
+	set date [clock format [clock seconds] -format %d.%m.]
 	for { set i 0 } { $i < [llength $html] } { incr i } {
-        	if {[regexp $date [lindex $html $i]]} {
+        	if {[regexp <td.*?>$date [lindex $html $i]]} {
 			lappend results [string trim [regsub -all {<([^<])*>} [lindex $html [expr $i - 2]] {}]]
         	}
 	}
@@ -179,15 +197,15 @@ proc getMerkkipaiva {} {
 }
 
 proc outputNameday {} {
-	return "[getDate][getNameday][getHoliday]"
+	return "[getDate][getHoliday][getNameday]"
 }
 
 proc announce { args } {
 	variable kanavat
 	if {[string index [lindex $args 3] 0] == "#"} {
 		# called via !pvm
-		putquick "NOTICE [lindex $args 3] :[outputNameday]"
-		putquick "NOTICE [lindex $args 3] :[getMerkkipaiva]"
+                putquick "NOTICE [lindex $args 3] :[outputNameday]"
+                putquick "NOTICE [lindex $args 3] :[getMerkkipaiva]"
 	} else {
 		# called via cron
 		foreach kanava [split $kanavat] {
