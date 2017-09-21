@@ -23,10 +23,11 @@
 ##		1.0.1	-	Fixed issue with weeknumbers
 ##              1.0.2   -       Updated namedays to work with updated external service
 ##              1.0.3   -       Fixed issue when triggering !pvm command, it would announce it in any channel where the bot is
+##              1.0.4   -       Added additional Merkkipäiväs
 
 namespace eval ::pvm {
 
-##      add channels HERE
+##      Add channels here. You can add multiple, just divide them with a whitespace
 set kanavat "#justsesunkanava"
 
 ##	Change daily hour HERE
@@ -36,7 +37,7 @@ set announceHour 05
 ##	After this, here be dragons
 ##
 
-set pvmVersion 1.0.3
+set pvmVersion 1.0.4
 
 bind time - "00 $announceHour % % %" ::pvm::announce
 bind pub - !pvm ::pvm::announce
@@ -178,11 +179,12 @@ proc getDate {} {
 
 proc getMerkkipaiva {} {
 
-        set url "http://www.webcal.fi/fi-FI/popup.php?content=eventlist&cid=31"
         set userAgent "Chrome 45.0.2454.101"
         ::http::config -useragent $userAgent
-        set httpHandler [::http::geturl $url]
+        set httpHandler [::http::geturl "http://www.webcal.fi/fi-FI/popup.php?content=eventlist&cid=31"]
         set html [split [::http::data $httpHandler] "\n"]
+        set httpHandler [::http::geturl "http://www.webcal.fi/fi-FI/popup.php?content=eventlist&cid=32"]
+        set html [concat $html [split [::http::data $httpHandler] "\n"]]
         ::http::cleanup $httpHandler
 
 	set date [clock format [clock seconds] -format %d.%m.]
