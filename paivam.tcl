@@ -24,6 +24,7 @@
 ##              1.0.2   -       Updated namedays to work with updated external service
 ##              1.0.3   -       Fixed issue when triggering !pvm command, it would announce it in any channel where the bot is
 ##              1.0.4   -       Added additional Merkkipäiväs
+##              1.0.5   -       Fixed issue when stripping html tags from results where they would get combined into one without whitespaces
 
 namespace eval ::pvm {
 
@@ -37,7 +38,7 @@ set announceHour 05
 ##	After this, here be dragons
 ##
 
-set pvmVersion 1.0.4
+set pvmVersion 1.0.5
 
 bind time - "00 $announceHour % % %" ::pvm::announce
 bind pub - !pvm ::pvm::announce
@@ -151,18 +152,19 @@ proc getNameday {} {
             putlog "No items after cleanup"
             return
         }
-        
+
         # Remove html-tags, leaving us with just the names
-        set names [regsub -all {(<[^>]*>)+} [lindex $items end] {}]
+        set names [regsub -all {(<[^>]*>)+} [lindex $items end] { }]
+
         if {[llength $names] == 0} {
             putlog "No names in items"
             return
         }
-        
+
         foreach item $names {
             if {[string length $item]} {lappend results $item}
         }
-	
+
 	if {[info exists results]} {
 		return " ja nimipäivää viettävät: [join [lsort $results] ", "]"
 	}
