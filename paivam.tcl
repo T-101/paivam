@@ -25,6 +25,7 @@
 ##              1.0.3   -       Fixed issue when triggering !pvm command, it would announce it in any channel where the bot is
 ##              1.0.4   -       Added additional Merkkipäiväs
 ##              1.0.5   -       Fixed issue when stripping html tags from results where they would get combined into one without whitespaces
+##		1.0.6	-	Fixex weeknumber output
 
 namespace eval ::pvm {
 
