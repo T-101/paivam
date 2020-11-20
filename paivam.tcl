@@ -39,7 +39,7 @@ set announceHour 05
 ##	After this, here be dragons
 ##
 
-set pvmVersion 1.0.5
+set pvmVersion 1.0.6
 
 bind time - "00 $announceHour % % %" ::pvm::announce
 bind pub - !pvm ::pvm::announce
