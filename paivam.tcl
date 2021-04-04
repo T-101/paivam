@@ -31,7 +31,7 @@
 
 namespace eval ::pvm {
 
-	if {[info exists $::env(PAIVAM_CHANNELS)]} {
+	if {[info exists ::env(PAIVAM_CHANNELS)]} {
 		set kanavat $::env(PAIVAM_CHANNELS)
 	} else {
 		putlog "Please set PAIVAM_CHANNELS environment variable"
