@@ -6,8 +6,9 @@
 ##
 ##	Usage: !pvm		# usually this runs daily
 ##
-##	You must set the "kanavat" variable to fit your needs
-##	This script will shout out to all of them
+##	You must set the PAIVAM_CHANNELS environment variable to fit your needs
+##	This script will shout out to all of them. multiple channels can be added, divided with a whitespace
+##  in bash: $ export PAIVAM_CHANNELS="#channel1 #channel2"
 ##
 ##	The "announceHour" variable is the hour of day
 ##	this will bind to
@@ -30,8 +31,12 @@
 
 namespace eval ::pvm {
 
-	##      Add channels here. You can add multiple, just divide them with a whitespace
-	set kanavat "#justsesunkanava"
+	if {[info exists ::env(PAIVAM_CHANNELS)]} {
+		set kanavat ::env(PAIVAM_CHANNELS)
+	} else {
+		putlog "Please set PAIVAM_CHANNELS environment variable
+		return
+	}
 
 	##	Change daily hour HERE
 	set announceHour 05
@@ -40,7 +45,7 @@ namespace eval ::pvm {
 	##	After this, here be dragons
 	##
 
-	set pvmVersion 1.0.6
+	set pvmVersion 1.1.0
 
 	bind time - "00 $announceHour % % %" ::pvm::announce
 	bind pub - !pvm ::pvm::announce
