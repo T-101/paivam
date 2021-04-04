@@ -226,7 +226,7 @@ namespace eval ::pvm {
 			::http::config -useragent $userAgent
 			::http::register https 443 ::tls::socket
 			::tls::init -tls1 1
-			set url "${::env(PAIVAM_APIURL)}date=${t}"
+			set url "${::env(PAIVAM_APIURL)}?date=${t}"
 			set httpHandler [::http::geturl $url -headers $headers]
 			set res [::http::data $httpHandler]
 			set res [encoding convertfrom utf-8 $res]
@@ -235,7 +235,7 @@ namespace eval ::pvm {
 
 			putlog "URL COULD BE ${url}?date=${t}"
 			set partyData [json::json2dict $res]
-			# putlog $partyData
+			putlog $partyData
 			foreach party [dict get $partyData results] {
 				putlog [dict get $party name]
 			}
