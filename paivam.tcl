@@ -156,7 +156,7 @@ namespace eval ::pvm {
 		proc getNameday {} {
 			set date [clock format [clock seconds] -format {%d%m}]
 			set url "https://almanakka.helsinki.fi/nimipaiva/datesearch.php?z=$date"
-			set text [::pvm:fetch $url]
+			set text [::pvm::fetch $url]
 
 			# Cleanup the html-garbage we've accumulated
 			set items [regexp -inline {Suomalaiset<\/h4>(.*?)<\/ul>} $text]
