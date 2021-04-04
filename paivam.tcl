@@ -38,6 +38,11 @@ namespace eval ::pvm {
 		return
 	}
 
+	if {![info exists ::env(PAIVAM_APIKEY)] || ![info exists ::env(PAIVAM_APIURL)]} {
+		putlog "Please set PAIVAM_APIKEY and PAIVAM_APIURL environment variable"
+		return
+	}
+
 	##	Change daily hour HERE
 	set announceHour 05
 
@@ -52,6 +57,7 @@ namespace eval ::pvm {
 
 	package require http
 	package require tls
+	package require json
 
 	proc fetch {url} {
 		set userAgent "Chrome 45.0.2454.101"
@@ -191,26 +197,42 @@ namespace eval ::pvm {
 			return "Tänään on $day $date (Viikko $weekNumber)"
 		}
 
+		# 		proc getMerkkipaiva {} {
+		#
+		# 			set userAgent "Chrome 45.0.2454.101"
+		# 			::http::config -useragent $userAgent
+		# 			set httpHandler [::http::geturl "http://www.webcal.fi/fi-FI/popup.php?content=eventlist&cid=31"]
+		# 			set html [split [::http::data $httpHandler] "\n"]
+		# 			set httpHandler [::http::geturl "http://www.webcal.fi/fi-FI/popup.php?content=eventlist&cid=32"]
+		# 			set html [concat $html [split [::http::data $httpHandler] "\n"]]
+		# 			::http::cleanup $httpHandler
+		#
+		# 			set date [clock format [clock seconds] -format %d.%m.]
+		# 			for { set i 0 } { $i < [llength $html] } { incr i } {
+		# 				if {[regexp <td.*?>$date [lindex $html $i]]} {
+		# 					lappend results [string trim [regsub -all {<([^<])*>} [lindex $html [expr $i - 2]] {}]]
+		# 				}
+		# 			}
+		# 			unset -nocomplain html
+		# 			if {[info exists results]} {
+		# 				return "Merkkipäiviä tänään: [join $results ", "]"
+		# 			}
+		# 		}
+
 		proc getMerkkipaiva {} {
-
-			set userAgent "Chrome 45.0.2454.101"
+			set userAgent "Eggdrop 0.8.16 slave@primitive.be"
+			set headers [list Authorization "Token $::env(PAIVAM_APIKEY)"]
 			::http::config -useragent $userAgent
-			set httpHandler [::http::geturl "http://www.webcal.fi/fi-FI/popup.php?content=eventlist&cid=31"]
-			set html [split [::http::data $httpHandler] "\n"]
-			set httpHandler [::http::geturl "http://www.webcal.fi/fi-FI/popup.php?content=eventlist&cid=32"]
-			set html [concat $html [split [::http::data $httpHandler] "\n"]]
-			::http::cleanup $httpHandler
-
-			set date [clock format [clock seconds] -format %d.%m.]
-			for { set i 0 } { $i < [llength $html] } { incr i } {
-				if {[regexp <td.*?>$date [lindex $html $i]]} {
-					lappend results [string trim [regsub -all {<([^<])*>} [lindex $html [expr $i - 2]] {}]]
-				}
-			}
-			unset -nocomplain html
-			if {[info exists results]} {
-				return "Merkkipäiviä tänään: [join $results ", "]"
-			}
+			::http::register https 443 ::tls::socket
+			::tls::init -tls1 1
+			set url $::env(PAIVAM_APIURL)
+			set httpHandler [::http::geturl $url -headers $headers]
+			set res [::http::data $httpHandler]
+			set t [clock format [clock seconds] -format {%Y-%m-%d}]
+			putlog "URL COULD BE $url ?date=${t}"
+			set partyData [json::json2dict $res results]
+			putlog partyData
+			return
 		}
 
 		proc outputNameday {} {
