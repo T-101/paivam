@@ -233,14 +233,17 @@ namespace eval ::pvm {
 			::http::unregister https
 			::http::cleanup $httpHandler
 
-			putlog "URL COULD BE ${url}?date=${t}"
+			# putlog "URL COULD BE ${url}?date=${t}"
 			set partyData [json::json2dict $res]
-			putlog $partyData
+			# putlog $partyData
 			foreach party [dict get $partyData results] {
-				putlog [dict get $party name]
+				# putlog [dict get $party name]
+				lappend results [dict get $party name]
 			}
 
-			return
+			if {[info exists results]} {
+				return "Merkkipäiviä tänään: [join $results ", "]"
+			}
 		}
 
 		proc outputNameday {} {
