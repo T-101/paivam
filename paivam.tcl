@@ -232,9 +232,13 @@ namespace eval ::pvm {
 			::http::cleanup $httpHandler
 
 			set t [clock format [clock seconds] -format {%Y-%m-%d}]
-			putlog "URL COULD BE $url ?date=${t}"
+			putlog "URL COULD BE ${url}?date=${t}"
 			set partyData [json::json2dict $res]
-			putlog $partyData
+			# putlog $partyData
+			foreach party [dict get $partyData results] {
+				putlog {[dict get $party name] [dict get $party date]}
+			}
+
 			return
 		}
 
