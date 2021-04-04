@@ -1,11 +1,0 @@
---2021-04-04 17:46:17--  https://www.webcal.guru/fi-FI/modal?content=calendar_content
-Resolving www.webcal.guru (www.webcal.guru)... 104.21.44.129, 172.67.199.252
-Connecting to www.webcal.guru (www.webcal.guru)|104.21.44.129|:443... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: unspecified [text/html]
-Saving to: ‘modal?content=calendar_content’
-
-            modal?conten     [<=>                               ]       0  --.-KB/s               modal?content=calendar_c     [ <=>                              ]     831  --.-KB/s    in 0s      
-
-2021-04-04 17:46:18 (7.69 MB/s) - ‘modal?content=calendar_content’ saved [831]
-

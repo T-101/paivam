@@ -228,9 +228,12 @@ namespace eval ::pvm {
 			set url $::env(PAIVAM_APIURL)
 			set httpHandler [::http::geturl $url -headers $headers]
 			set res [::http::data $httpHandler]
+			::http::unregister https
+			::http::cleanup $httpHandler
+
 			set t [clock format [clock seconds] -format {%Y-%m-%d}]
 			putlog "URL COULD BE $url ?date=${t}"
-			set partyData [json::json2dict $res results]
+			set partyData [json::json2dict $res]
 			putlog partyData
 			return
 		}
