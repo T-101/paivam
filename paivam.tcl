@@ -234,7 +234,7 @@ namespace eval ::pvm {
 			set t [clock format [clock seconds] -format {%Y-%m-%d}]
 			putlog "URL COULD BE $url ?date=${t}"
 			set partyData [json::json2dict $res]
-			putlog partyData
+			putlog $partyData
 			return
 		}
 
