@@ -220,18 +220,19 @@ namespace eval ::pvm {
 		# 		}
 
 		proc getMerkkipaiva {} {
+			set t [clock format [clock seconds] -format {%Y-%m-%d}]
 			set userAgent "Eggdrop 0.8.16 slave@primitive.be"
 			set headers [list Authorization "Token $::env(PAIVAM_APIKEY)"]
 			::http::config -useragent $userAgent
 			::http::register https 443 ::tls::socket
 			::tls::init -tls1 1
-			set url $::env(PAIVAM_APIURL)
+			set url "${::env(PAIVAM_APIURL)}date=${t}"
 			set httpHandler [::http::geturl $url -headers $headers]
 			set res [::http::data $httpHandler]
+			set res [encoding convertfrom utf-8 $res]
 			::http::unregister https
 			::http::cleanup $httpHandler
 
-			set t [clock format [clock seconds] -format {%Y-%m-%d}]
 			putlog "URL COULD BE ${url}?date=${t}"
 			set partyData [json::json2dict $res]
 			# putlog $partyData
