@@ -236,7 +236,7 @@ namespace eval ::pvm {
 			set partyData [json::json2dict $res]
 			# putlog $partyData
 			foreach party [dict get $partyData results] {
-				putlog {[dict get $party name] [dict get $party date]}
+				putlog [dict get $party name]
 			}
 
 			return
